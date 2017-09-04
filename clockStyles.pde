@@ -131,7 +131,6 @@ class Clock {
         String ampmText = " am";
         if( hour() > 12 ) { ampmText = " pm"; }
         String dateText = dayOfTheWeek(month(),day(),year()) + ", " + monthText[month()-1] + " " + day(); 
-        println(dateText);
         
         pg.textFont(font1);
         pg.textSize( timeTextSize );
@@ -218,6 +217,7 @@ class Clock {
         
         
         pg.endDraw();
+        println(dateText + " " +hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
       }
       image(pg , 0 , 0 );
     }
@@ -244,6 +244,9 @@ class Clock {
         float vertOffset = 0.6;
         float ampmOffset = -10;
         String timeText = hour()%12 + ":" + nf(minute(),2);
+        if( hour()%12 == 0 ) {
+          timeText = "12:" + nf(minute(),2);
+        }
         String ampmText = " am";
         if( hour() > 12 ) { ampmText = " pm"; }
         
@@ -265,6 +268,7 @@ class Clock {
         pg.text( ampmText ,  timeX-0.5*(timeTextWidth+ampmTextWidth)+timeTextWidth , 
                  timeY - vertOffset*timeTextSize + (timeTextSize-ampmTextSize) + ampmOffset ); 
         pg.endDraw();
+        println(hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
       }
       image(pg , 0 , 0 );
     }
@@ -291,6 +295,9 @@ class Clock {
         float vertOffset = 0.6;
         float ampmOffset = -10;
         String timeText = hour()%12 + ":" + nf(minute(),2);
+        if( hour()%12 == 0 ) {
+          timeText = "12:" + nf(minute(),2);
+        }
         String ampmText = " am";
         if( hour() > 12 ) { ampmText = " pm"; }
         
@@ -312,6 +319,7 @@ class Clock {
         pg.text( ampmText ,  timeX-0.5*(timeTextWidth+ampmTextWidth)+timeTextWidth , 
                  timeY - vertOffset*timeTextSize + (timeTextSize-ampmTextSize) + ampmOffset ); 
         pg.endDraw();
+        println(hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
       }
       image(pg , 0 , 0 );
     }
@@ -352,11 +360,13 @@ class Clock {
         float ampmOffset = -10;
         float dateOffset = -4;
         String timeText = hour()%12 + ":" + nf(minute(),2);
+        if( hour()%12 == 0 ) {
+          timeText = "12:" + nf(minute(),2);
+        }
         String ampmText = " am";
         if( hour() > 12 ) { ampmText = " pm"; }
         String dateText = dayOfTheWeek(month(),day(),year()) + ", " + monthText[month()-1] + " " + day(); 
-        println(dateText);
-        
+                
         pg.textFont(font1);
         pg.textSize( timeTextSize );
         float timeTextWidth = pg.textWidth( timeText );
@@ -386,6 +396,7 @@ class Clock {
                  
         
         pg.endDraw();
+        println(dateText + " " +hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
       }
       image(pg , 0 , 0 );
     }
@@ -419,10 +430,12 @@ class Clock {
         float ampmOffset = -10;
         float dateOffset = -4;
         String timeText = hour()%12 + ":" + nf(minute(),2);
+        if( hour()%12 == 0 ) {
+          timeText = "12:" + nf(minute(),2);
+        }
         String ampmText = " am";
         if( hour() > 12 ) { ampmText = " pm"; }
         String dateText = dayOfTheWeek(month(),day(),year()) + ", " + monthText[month()-1] + " " + day(); 
-        println(dateText);
         
         pg.textFont(font1);
         pg.textSize( timeTextSize );
@@ -453,6 +466,7 @@ class Clock {
                  
         
         pg.endDraw();
+        println(dateText + " " +hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
       }
       image(pg , 0 , 0 );
     }

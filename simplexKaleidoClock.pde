@@ -313,7 +313,7 @@ void draw() {
   while( !colFlag_thread_loopComplete1 ) {}
   colFlag_thread_loopComplete1 = false;
   
-  if( frameCount%200 == 0 ) {
+  if( frameCount%500 == 0 ) {
     println( "frameRate: " , frameRate );
   }
   
