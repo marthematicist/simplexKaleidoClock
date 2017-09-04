@@ -1,6 +1,6 @@
 // color calulation thread
 
-float alpha = 0.05;
+float alpha = 0.025;
 
 color bgColor = color( 0 , 0 , 0 );
 color outlineColor = color( 255 , 255 , 255 );

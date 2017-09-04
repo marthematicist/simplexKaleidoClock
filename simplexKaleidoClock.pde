@@ -1,6 +1,6 @@
 String zip = "98264";
 String APIkey = "41ece43d5325fc28";
-Boolean liveData = true;    // set true to get real data from api, false for testing
+Boolean liveData = false;    // set true to get real data from api, false for testing
 Boolean logClockUpdateTime = false;
 
 volatile PixelArray PA;
@@ -241,26 +241,27 @@ void draw() {
     
   clock.drawClock();
   
-  if( mouseDown ) {
+  if( mouseDownQuit ) {
     if( millis() - mousePressTime > mousePressTimeout ) {
       exit();
     }
     if( millis() - mousePressTime > mouseMessageDelay ) {
       String msg = "CLOSING IN " + ( (mousePressTimeout - (millis() - mousePressTime) )/1000+1 );
-      
-      textAlign(CENTER,CENTER);
-      textSize(60);
-      rectMode(CENTER);
-      fill(255,0,0,196);
-      stroke( 255 );
-      strokeWeight( 5);
-      rect(halfWidth , halfHeight+10 , 420 , 90 , 10 , 10 , 10 , 10 );
-      fill(255);
-      text( msg , halfWidth , halfHeight );
-      
+      showSystemMessage( msg );
     }
-    
   }
+  
+  if( alphaSliderEngaged ) {
+    alpha = lerpCube( alphaMin , alphaMax , float(mouseX)/float(width) );
+    String msg = "alpha =  " + nf( float( round( alpha*1000 ) ) / 1000 , 0 , 3);
+    showSystemMessage( msg );
+  }
+  if( speedSliderEngaged ) {
+    masterSpeed = lerpSquare( speedMin , speedMax , float(mouseX)/float(width) );
+    String msg = "speed =  " + nf( float( round( masterSpeed*100 ) ) / 100 , 0 , 2);
+    showSystemMessage( msg );
+  }
+    
   
 }
 
@@ -274,20 +275,63 @@ boolean hourChanged = false;
 boolean dayChanged = false;
 boolean resetClock = false;
 
-boolean mouseDown = false;
+boolean mouseDownQuit = false;
 int mousePressTime = 0;
 int mousePressTimeout = 6000;
 int mouseMessageDelay = 1000;
 
+float sliderHeight = 30;
+boolean speedSliderEngaged = false;
+boolean alphaSliderEngaged = false;
+float alphaMin = 0.01;
+float alphaMax = 1;
+float speedMin = 0;
+float speedMax = 10;
+
 void mousePressed() {
-  if( mouseX >= halfWidth ) { clock.nextClock(); }
-  else { clock.prevClock(); }
+  if( mouseY >= sliderHeight && height - mouseY >= sliderHeight ) { 
+    mouseDownQuit = true;
+    if( mouseX >= halfWidth ) { clock.nextClock(); }
+    else { clock.prevClock(); }
+  } else {
+    if( mouseY >sliderHeight ) {
+      speedSliderEngaged = true;
+    }
+    if( height - mouseY > sliderHeight ) {
+      alphaSliderEngaged = true;
+    }
+  }
+  
   resetClock = true;
-  mouseDown = true;
   mousePressTime = millis();
 }
 
 void mouseReleased() {
-  mouseDown = false;
+  mouseDownQuit = false;
+  speedSliderEngaged = false;
+  alphaSliderEngaged = false;
   
+}
+
+
+void showSystemMessage( String systemText ) {
+  textAlign(CENTER,CENTER);
+      textSize(40);
+      rectMode(CENTER);
+      fill(255,0,0,196);
+      stroke( 255 );
+      strokeWeight( 5);
+      float msgWidth = textWidth( systemText );
+      rect(halfWidth , halfHeight+5 , msgWidth + 20 , 60 , 10 , 10 , 10 , 10 );
+      fill(255);
+      text( systemText , halfWidth , halfHeight );
+}
+
+
+float lerpSquare( float val1 , float val2 , float amt ) {
+  return lerp( val1 , val2 , amt*amt );
+}
+
+float lerpCube( float val1 , float val2 , float amt ) {
+  return lerp( val1 , val2 , amt*amt*amt );
 }

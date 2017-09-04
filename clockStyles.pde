@@ -1,7 +1,7 @@
 
 class Clock {
 
-  int[] clockOrder = { 0 , 6 , 10 , 9 , 4 , 1 , 2 , 5 , 8 , 7 , 3 , 11 };
+  int[] clockOrder = { 0 , 6 , 10 , 9 , 4 , 1 , 2 , 5 , 8 , 7 , 3 };
   int numClocks = clockOrder.length;
   int clockTicker = 0;
   int clockID = clockOrder[clockTicker];
@@ -105,8 +105,6 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 10 ) {
       if( minuteChanged || resetClock ) {
-        masterSpeed = 2;
-        alpha = 0.025;
         
         minuteChanged = false;
         resetClock = false;
@@ -246,8 +244,6 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 9 ) {
       if( secondChanged || resetClock ) {
-        masterSpeed = 2;
-        alpha = 0.025;
         
         secondChanged = false;
         resetClock = false;
@@ -405,8 +401,6 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 7 ) {
       if( secondChanged || resetClock ) {
-        masterSpeed = 2;
-        alpha = 0.025;
         
         secondChanged = false;
         resetClock = false;
@@ -572,8 +566,6 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 0 ) {
       if( minuteChanged || resetClock ) {
-        masterSpeed = 2;
-        alpha = 0.025;
         
         minuteChanged = false;
         resetClock = false;
@@ -702,8 +694,6 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 6 ) {
       if( minuteChanged || resetClock ) {
-        masterSpeed = 2;
-        alpha = 0.025;
         
         minuteChanged = false;
         resetClock = false;
@@ -835,8 +825,6 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 1 ) {
       if( minuteChanged || resetClock ) {
-        masterSpeed = 2;
-        alpha = 0.025;
         
         minuteChanged = false;
         resetClock = false;
@@ -889,8 +877,6 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 2  ) {
       if(  minuteChanged || resetClock ) {
-        masterSpeed = 2;
-        alpha = 0.025;
         
         minuteChanged = false;
         resetClock = false;
@@ -943,32 +929,17 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 3 ) {
       if( resetClock ) {
-        masterSpeed = 2;
-        alpha = 0.025;
         
       }
       // no clock
     }
     
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // CLOCK TYPE 11 //////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    if( clockID == 11 ) {
-      if( resetClock ) {
-        masterSpeed = 6;
-        alpha = 0.05;
-        
-      }
-      // no clock
-    }
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // CLOCK TYPE 4 ///////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 4 ) {
       if( minuteChanged || resetClock ) {
-        masterSpeed = 2;
-        alpha = 0.025;
         
         resetClock = false;
         minuteChanged = false;
@@ -1040,8 +1011,6 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 5  ) {
       if( minuteChanged || resetClock ) {
-        masterSpeed = 2;
-        alpha = 0.025;
         
         resetClock = false;
         minuteChanged = false;
