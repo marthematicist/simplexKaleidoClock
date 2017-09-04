@@ -394,7 +394,7 @@ class Clock {
         pg.rect( day3_x - 0.5*weatherWidth , weatherY - 0.5*weatherHeight , weatherWidth , weatherHeight ,
                  weatherCorner , weatherCorner , weatherCorner , weatherCorner );
                  
-        float dayTextSize = 30;
+        float dayTextSize = 25;
         float dayTextOffset = -60;
         float tempTextSize = 25;
         float tempTextOffset = 30;
