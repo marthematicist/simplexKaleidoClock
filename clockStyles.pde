@@ -491,8 +491,6 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 8 ) {
       if( minuteChanged || resetClock ) {
-        masterSpeed = 2;
-        alpha = 0.025;
         
         minuteChanged = false;
         resetClock = false;
