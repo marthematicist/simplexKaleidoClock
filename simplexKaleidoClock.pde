@@ -244,6 +244,27 @@ void draw() {
     
   clock.drawClock();
   
+  if( mouseDown ) {
+    if( millis() - mousePressTime > mousePressTimeout ) {
+      exit();
+    }
+    if( millis() - mousePressTime > mouseMessageDelay ) {
+      String msg = "CLOSING IN " + ( (mousePressTimeout - (millis() - mousePressTime) )/1000+1 );
+      
+      textAlign(CENTER,CENTER);
+      textSize(60);
+      rectMode(CENTER);
+      fill(255,0,0,196);
+      stroke( 255 );
+      strokeWeight( 5);
+      rect(halfWidth , halfHeight+10 , 420 , 90 , 10 , 10 , 10 , 10 );
+      fill(255);
+      text( msg , halfWidth , halfHeight );
+      
+    }
+    
+  }
+  
 }
 
 int prevSecond = -1;
@@ -256,8 +277,20 @@ boolean hourChanged = false;
 boolean dayChanged = false;
 boolean resetClock = false;
 
+boolean mouseDown = false;
+int mousePressTime = 0;
+int mousePressTimeout = 6000;
+int mouseMessageDelay = 1000;
+
 void mousePressed() {
   if( mouseX >= halfWidth ) { clock.nextClock(); }
   else { clock.prevClock(); }
   resetClock = true;
+  mouseDown = true;
+  mousePressTime = millis();
+}
+
+void mouseReleased() {
+  mouseDown = false;
+  
 }
