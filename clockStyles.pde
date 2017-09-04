@@ -434,7 +434,7 @@ class Clock {
   
   void updateWeather() {
     w = loadXML( API_URL );
-    day0_dayName = "Today";
+    day0_dayName = "TODAY";
     day0_dayNum = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("date/day").getContent("day");
     day0_high = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("high/fahrenheit").getContent("fahrenheit");
     day0_low = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("low/fahrenheit").getContent("fahrenheit");
