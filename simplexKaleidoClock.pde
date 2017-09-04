@@ -1,6 +1,6 @@
 String zip = "98264";
 String APIkey = "41ece43d5325fc28";
-Boolean liveData = false;    // set true to get real data from api, false for testing
+Boolean liveData = true;    // set true to get real data from api, false for testing
 Boolean logClockUpdateTime = false;
 
 volatile PixelArray PA;
@@ -283,7 +283,7 @@ int mouseMessageDelay = 1000;
 float sliderHeight = 30;
 boolean speedSliderEngaged = false;
 boolean alphaSliderEngaged = false;
-float alphaMin = 0.01;
+float alphaMin = 0.001;
 float alphaMax = 1;
 float speedMin = 0;
 float speedMax = 10;
