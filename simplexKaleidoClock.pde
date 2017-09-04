@@ -253,13 +253,18 @@ void draw() {
   
   if( alphaSliderEngaged ) {
     alpha = lerpCube( alphaMin , alphaMax , float(mouseX)/float(width) );
-    String msg = "alpha =  " + nf( float( round( alpha*1000 ) ) / 1000 , 0 , 3);
+    String msg = "smoothness =  " + nf( float( round( alpha*1000 ) ) / 1000 , 0 , 3);
     showSystemMessage( msg );
   }
   if( speedSliderEngaged ) {
     masterSpeed = lerpSquare( speedMin , speedMax , float(mouseX)/float(width) );
     String msg = "speed =  " + nf( float( round( masterSpeed*100 ) ) / 100 , 0 , 2);
     showSystemMessage( msg );
+  }
+  
+  if( captureScreenshot ) {
+    captureScreenshot = false;
+    save( "screenShot.jpg" );
   }
     
   
@@ -288,6 +293,8 @@ float alphaMax = 1;
 float speedMin = 0;
 float speedMax = 10;
 
+boolean captureScreenshot = false;
+
 void mousePressed() {
   if( mouseY >= sliderHeight && height - mouseY >= sliderHeight ) { 
     mouseDownQuit = true;
@@ -313,6 +320,11 @@ void mouseReleased() {
   
 }
 
+void keyPressed() {
+  if( key == 's' ) {
+    captureScreenshot = true;
+  }
+}
 
 void showSystemMessage( String systemText ) {
   textAlign(CENTER,CENTER);
