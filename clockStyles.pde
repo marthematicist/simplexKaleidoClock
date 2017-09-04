@@ -2,8 +2,9 @@
 class Clock {
   
   int clockID = 0;
-  int numClocks = 6;
-  String API_URL = "http://api.wunderground.com/api/" + APIkey + "/forecast/q/" + zip + ".xml";
+  int numClocks = 4;
+  String API_URL_forecast ="http://api.wunderground.com/api/" + APIkey + "/forecast/q/" + zip + ".xml";
+  String API_URL_astronomy ="http://api.wunderground.com/api/" + APIkey + "/astronomy/q/" + zip + ".xml";
   
   PFont font1;
   PFont font2;
@@ -19,12 +20,14 @@ class Clock {
   String day0_high;
   String day0_low;
   String day0_icon_url;
+  String day0_icon_url_night;
   String day0_windavg;
   String day0_winddir;
   String day0_dateText;
   String day0_tempText;
   String day0_windText;
   PImage icon0;
+  PImage icon0Night;
   String day1_dayName;
   String day1_dayNum;
   String day1_high;
@@ -59,13 +62,20 @@ class Clock {
   String day3_windText;
   PImage icon3;
   
+  // Astronomy variables
+  XML astro;
+  int sunriseHour;
+  int sunsetHour;
+  
+  
   Clock() {
     font1 = createFont("TruenoRg.otf",100);
     font2 = createFont("TruenoRg.otf",100);
     font3 = createFont("TruenoRg.otf",100);
     font4 = createFont("TruenoRg.otf",100);
-    updateWeather();
-    println( API_URL );
+    //updateWeather();
+    w =  loadXML("98264-temp.xml");
+    astro = loadXML("98264-sunrise.xml");
   }
   
   void nextClock() {
@@ -74,8 +84,139 @@ class Clock {
   }
   
   void drawClock() {
-    if( clockID == 5 ) {
-      // no clock
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // CLOCK TYPE 0 ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if( clockID == 0 ) {
+      if( minuteChanged || resetClock ) {
+        minuteChanged = false;
+        resetClock = false;
+        
+        if( hourChanged ) {
+          hourChanged = false;
+          updateWeather();
+        }
+        
+        if( dayChanged ) {
+          dayChanged = true;
+          updateAstronomy();
+        }
+        
+        pg.beginDraw();
+        pg.textAlign( LEFT , TOP );
+        // values
+        float timeCorner = 20;
+        float dateCorner = 10;
+        color bgColor = color( 0 , 0 , 0 , 160 );
+        color textColor = color( 255 , 255 , 255 , 196 );
+        float timeBorderX = 10;
+        float timeBorderY = 0;
+        float timeX = halfWidth;
+        float timeY = height*0.2;
+        float dateBorderX = 10;
+        float dateBorderY = 5;
+        float dateX = halfWidth;
+        float dateY = height*0.05;
+        float timeTextSize = 100;
+        float ampmTextSize = 20;
+        float dateTextSize = 20;
+        float vertOffset = 0.6;
+        float ampmOffset = -1;
+        float dateOffset = -4;
+        String timeText = hour()%12 + ":" + nf(minute(),2);
+        String ampmText = " am";
+        if( hour() > 12 ) { ampmText = " pm"; }
+        String dateText = dayOfTheWeek(month(),day(),year()) + ", " + monthText[month()-1] + " " + day(); 
+        println(dateText);
+        
+        pg.textFont(font1);
+        pg.textSize( timeTextSize );
+        float timeTextWidth = pg.textWidth( timeText );
+        pg.textSize( ampmTextSize );
+        float ampmTextWidth = pg.textWidth( ampmText );
+        pg.textSize( dateTextSize );
+        float dateTextWidth = pg.textWidth( dateText );
+  
+        pg.clear();
+        pg.noStroke();
+        pg.fill( bgColor );
+        pg.rect( timeX - 0.5*(timeTextWidth+ampmTextWidth)-timeBorderX , timeY - 0.5*timeTextSize - timeBorderY , 
+                 timeTextWidth+ampmTextWidth + 2*timeBorderX , timeTextSize + 2*timeBorderY , timeCorner , timeCorner , timeCorner , timeCorner );
+        pg.fill( textColor );
+        pg.textSize( timeTextSize );
+        pg.text( timeText ,  timeX-0.5*(timeTextWidth+ampmTextWidth) , timeY - vertOffset*timeTextSize ); 
+        pg.textSize( ampmTextSize );
+        pg.text( ampmText ,  timeX-0.5*(timeTextWidth+ampmTextWidth)+timeTextWidth , 
+                 timeY - vertOffset*timeTextSize + (timeTextSize-ampmTextSize) + ampmOffset ); 
+                 
+        pg.fill( bgColor );
+        pg.rect( dateX - 0.5*(dateTextWidth)-timeBorderX , dateY - 0.5*dateTextSize - dateBorderY , 
+                 dateTextWidth + 2*dateBorderX , dateTextSize + 2*dateBorderY , dateCorner , dateCorner , dateCorner , dateCorner );
+        pg.fill( textColor );
+        pg.textSize( dateTextSize );
+        pg.text( dateText ,  dateX-0.5*(dateTextWidth) , dateY - 0.5*dateTextSize + dateOffset ); 
+                 
+        
+        float weatherWidth = 0.16*width;
+        float weatherHeight = 0.30*height;
+        float weatherGap = (width-4*weatherWidth)/5.0;
+        float weatherY = 0.83*height;
+        float weatherCorner = 10;
+        float day0_x = weatherGap*1+0.5*weatherWidth;
+        float day1_x = weatherGap*2+1.5*weatherWidth;
+        float day2_x = weatherGap*3+2.5*weatherWidth;
+        float day3_x = weatherGap*4+3.5*weatherWidth;
+        
+        pg.fill( bgColor );
+        pg.rect( day0_x - 0.5*weatherWidth , weatherY - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+        pg.rect( day1_x - 0.5*weatherWidth , weatherY - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+        pg.rect( day2_x - 0.5*weatherWidth , weatherY - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+        pg.rect( day3_x - 0.5*weatherWidth , weatherY - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+                 
+        float dayTextSize = 25;
+        float dayTextOffset = -60;
+        float tempTextSize = 25;
+        float tempTextOffset = 30;
+        float windTextSize = 15;
+        float windTextOffset = 55;
+        float iconOffset = -35;
+        float iconSize = icon0.width;
+        
+        pg.fill( textColor );
+        pg.textAlign( CENTER , CENTER );
+        pg.textSize( dayTextSize );
+        pg.text( day0_dateText , day0_x , weatherY + dayTextOffset );
+        pg.text( day1_dateText , day1_x , weatherY + dayTextOffset );
+        pg.text( day2_dateText , day2_x , weatherY + dayTextOffset );
+        pg.text( day3_dateText , day3_x , weatherY + dayTextOffset );
+        pg.textSize( tempTextSize );
+        pg.text( day0_tempText , day0_x , weatherY + tempTextOffset );
+        pg.text( day1_tempText , day1_x , weatherY + tempTextOffset );
+        pg.text( day2_tempText , day2_x , weatherY + tempTextOffset );
+        pg.text( day3_tempText , day3_x , weatherY + tempTextOffset );
+        pg.textSize( windTextSize );
+        pg.text( day0_windText , day0_x , weatherY + windTextOffset );
+        pg.text( day1_windText , day1_x , weatherY + windTextOffset );
+        pg.text( day2_windText , day2_x , weatherY + windTextOffset );
+        pg.text( day3_windText , day3_x , weatherY + windTextOffset );
+        if( hour() >= sunsetHour - 1 ) {
+          pg.image( icon0Night , day0_x - 0.5*iconSize , weatherY + iconOffset );
+        } else {
+          pg.image( icon0 , day0_x - 0.5*iconSize , weatherY + iconOffset );
+        }
+        pg.image( icon1 , day1_x - 0.5*iconSize , weatherY + iconOffset );
+        pg.image( icon2 , day2_x - 0.5*iconSize , weatherY + iconOffset );
+        pg.image( icon3 , day3_x - 0.5*iconSize , weatherY + iconOffset );
+        
+        
+        pg.endDraw();
+      }
+      image(pg , 0 , 0 );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,6 +317,13 @@ class Clock {
     // CLOCK TYPE 3 ///////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 3 ) {
+      // no clock
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // CLOCK TYPE 4 ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if( clockID == 4 ) {
       if( minuteChanged || resetClock ) {
         resetClock = false;
         minuteChanged = false;
@@ -240,9 +388,9 @@ class Clock {
     }
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // CLOCK TYPE 4 ///////////////////////////////////////////////////////////////////////////////////////////////
+    // CLOCK TYPE 5 ///////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    if( clockID == 4  ) {
+    if( clockID == 5  ) {
       if( minuteChanged || resetClock ) {
         resetClock = false;
         minuteChanged = false;
@@ -306,142 +454,31 @@ class Clock {
       image(pg , 0 , 0 );
     }
     
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // CLOCK TYPE 5 ///////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    if( clockID == 0 ) {
-      if( minuteChanged || resetClock ) {
-        minuteChanged = false;
-        resetClock = false;
-        
-        if( hourChanged ) {
-          hourChanged = false;
-          updateWeather();
-        }
-        
-        pg.beginDraw();
-        pg.textAlign( LEFT , TOP );
-        // values
-        float timeCorner = 20;
-        float dateCorner = 10;
-        color bgColor = color( 0 , 0 , 0 , 160 );
-        color textColor = color( 255 , 255 , 255 , 196 );
-        float timeBorderX = 10;
-        float timeBorderY = 0;
-        float timeX = halfWidth;
-        float timeY = height*0.2;
-        float dateBorderX = 10;
-        float dateBorderY = 5;
-        float dateX = halfWidth;
-        float dateY = height*0.05;
-        float timeTextSize = 100;
-        float ampmTextSize = 20;
-        float dateTextSize = 20;
-        float vertOffset = 0.6;
-        float ampmOffset = -1;
-        float dateOffset = -4;
-        String timeText = hour()%12 + ":" + nf(minute(),2);
-        String ampmText = " am";
-        if( hour() > 12 ) { ampmText = " pm"; }
-        String dateText = dayOfTheWeek(month(),day(),year()) + ", " + monthText[month()-1] + " " + day(); 
-        println(dateText);
-        
-        pg.textFont(font1);
-        pg.textSize( timeTextSize );
-        float timeTextWidth = pg.textWidth( timeText );
-        pg.textSize( ampmTextSize );
-        float ampmTextWidth = pg.textWidth( ampmText );
-        pg.textSize( dateTextSize );
-        float dateTextWidth = pg.textWidth( dateText );
+    
+  }
   
-        pg.clear();
-        pg.noStroke();
-        pg.fill( bgColor );
-        pg.rect( timeX - 0.5*(timeTextWidth+ampmTextWidth)-timeBorderX , timeY - 0.5*timeTextSize - timeBorderY , 
-                 timeTextWidth+ampmTextWidth + 2*timeBorderX , timeTextSize + 2*timeBorderY , timeCorner , timeCorner , timeCorner , timeCorner );
-        pg.fill( textColor );
-        pg.textSize( timeTextSize );
-        pg.text( timeText ,  timeX-0.5*(timeTextWidth+ampmTextWidth) , timeY - vertOffset*timeTextSize ); 
-        pg.textSize( ampmTextSize );
-        pg.text( ampmText ,  timeX-0.5*(timeTextWidth+ampmTextWidth)+timeTextWidth , 
-                 timeY - vertOffset*timeTextSize + (timeTextSize-ampmTextSize) + ampmOffset ); 
-                 
-        pg.fill( bgColor );
-        pg.rect( dateX - 0.5*(dateTextWidth)-timeBorderX , dateY - 0.5*dateTextSize - dateBorderY , 
-                 dateTextWidth + 2*dateBorderX , dateTextSize + 2*dateBorderY , dateCorner , dateCorner , dateCorner , dateCorner );
-        pg.fill( textColor );
-        pg.textSize( dateTextSize );
-        pg.text( dateText ,  dateX-0.5*(dateTextWidth) , dateY - 0.5*dateTextSize + dateOffset ); 
-                 
-        
-        float weatherWidth = 0.18*width;
-        float weatherHeight = 0.32*height;
-        float weatherGap = (width-4*weatherWidth)/5.0;
-        float weatherY = 0.8*height;
-        float weatherCorner = 10;
-        float day0_x = weatherGap*1+0.5*weatherWidth;
-        float day1_x = weatherGap*2+1.5*weatherWidth;
-        float day2_x = weatherGap*3+2.5*weatherWidth;
-        float day3_x = weatherGap*4+3.5*weatherWidth;
-        
-        pg.fill( bgColor );
-        pg.rect( day0_x - 0.5*weatherWidth , weatherY - 0.5*weatherHeight , weatherWidth , weatherHeight ,
-                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
-        pg.rect( day1_x - 0.5*weatherWidth , weatherY - 0.5*weatherHeight , weatherWidth , weatherHeight ,
-                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
-        pg.rect( day2_x - 0.5*weatherWidth , weatherY - 0.5*weatherHeight , weatherWidth , weatherHeight ,
-                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
-        pg.rect( day3_x - 0.5*weatherWidth , weatherY - 0.5*weatherHeight , weatherWidth , weatherHeight ,
-                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
-                 
-        float dayTextSize = 25;
-        float dayTextOffset = -60;
-        float tempTextSize = 25;
-        float tempTextOffset = 30;
-        float windTextSize = 15;
-        float windTextOffset = 55;
-        float iconOffset = -35;
-        float iconSize = icon0.width;
-        
-        pg.fill( textColor );
-        pg.textAlign( CENTER , CENTER );
-        pg.textSize( dayTextSize );
-        pg.text( day0_dateText , day0_x , weatherY + dayTextOffset );
-        pg.text( day1_dateText , day1_x , weatherY + dayTextOffset );
-        pg.text( day2_dateText , day2_x , weatherY + dayTextOffset );
-        pg.text( day3_dateText , day3_x , weatherY + dayTextOffset );
-        pg.textSize( tempTextSize );
-        pg.text( day0_tempText , day0_x , weatherY + tempTextOffset );
-        pg.text( day1_tempText , day1_x , weatherY + tempTextOffset );
-        pg.text( day2_tempText , day2_x , weatherY + tempTextOffset );
-        pg.text( day3_tempText , day3_x , weatherY + tempTextOffset );
-        pg.textSize( windTextSize );
-        pg.text( day0_windText , day0_x , weatherY + windTextOffset );
-        pg.text( day1_windText , day1_x , weatherY + windTextOffset );
-        pg.text( day2_windText , day2_x , weatherY + windTextOffset );
-        pg.text( day3_windText , day3_x , weatherY + windTextOffset );
-        pg.image( icon0 , day0_x - 0.5*iconSize , weatherY + iconOffset );
-        pg.image( icon1 , day1_x - 0.5*iconSize , weatherY + iconOffset );
-        pg.image( icon2 , day2_x - 0.5*iconSize , weatherY + iconOffset );
-        pg.image( icon3 , day3_x - 0.5*iconSize , weatherY + iconOffset );
-        
-        
-        pg.endDraw();
-      }
-      image(pg , 0 , 0 );
-    }
+  void updateAstronomy() {
+    astro = loadXML( API_URL_astronomy );
+    sunriseHour = Integer.parseInt(astro.getChild("sun_phase/sunrise/hour").getContent("hour"));
+    sunsetHour = Integer.parseInt(astro.getChild("sun_phase/sunset/hour").getContent("hour"));
+    println("---");
+    println( "sunriseHour = " + sunriseHour + "  ;  sunsetHour = " + sunsetHour );
+    println("UPDATED ASTRONOMY AT " + hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
+    println( API_URL_astronomy );
   }
   
   void updateWeather() {
-    w = loadXML( API_URL );
-    day0_dayName = "TODAY";
+    w = loadXML( API_URL_forecast );
+    day0_dayName = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("date/weekday_short").getContent("weekday_short");
     day0_dayNum = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("date/day").getContent("day");
     day0_high = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("high/fahrenheit").getContent("fahrenheit");
     day0_low = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("low/fahrenheit").getContent("fahrenheit");
     day0_icon_url = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("icon_url").getContent("icon_url");
+    day0_icon_url_night = w.getChild("forecast/txt_forecast/forecastdays").getChild(3).getChild("icon_url").getContent("icon_url");
     day0_windavg = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("avewind/mph").getContent("mph");
     day0_winddir = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("avewind/dir").getContent("dir");
     icon0 = loadImage( day0_icon_url );
+    icon0Night = loadImage( day0_icon_url_night );
     day0_dateText = ( day0_dayName + " | " + day0_dayNum );
     day0_tempText = ( day0_high + " | " + day0_low );
     day0_windText = ( day0_winddir + " at " + day0_windavg + " mph" );
@@ -502,7 +539,8 @@ class Clock {
     println( day3_winddir + " at " + day3_windavg + " mph" );
     println( "-----" );
     
-    println("UPDATED WEATHER AT " + hour() + ":" + minute() + ":" + second() );
+    println("UPDATED WEATHER AT " + hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
+    println( API_URL_forecast );
     
   }
   

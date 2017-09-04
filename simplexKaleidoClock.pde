@@ -1,4 +1,4 @@
-String zip = "43202";
+String zip = "98264";
 String APIkey = "41ece43d5325fc28";
 
 
@@ -326,6 +326,10 @@ void draw() {
     prevHour = hour();
     hourChanged = true;
   }
+  if( day() != prevDay ) {
+    prevDay = day();
+    dayChanged = true;
+  }
     
   clock.drawClock();
   
@@ -333,9 +337,11 @@ void draw() {
 
 int prevMin = -1;
 int prevHour = -1;
-boolean minuteChanged = true;
-boolean hourChanged = true;
-boolean resetClock = true;
+int prevDay = -1;
+boolean minuteChanged = false;
+boolean hourChanged = false;
+boolean dayChanged = false;
+boolean resetClock = false;
 
 void mousePressed() {
   clock.nextClock();
