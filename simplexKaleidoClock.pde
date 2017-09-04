@@ -1,6 +1,7 @@
 String zip = "98264";
 String APIkey = "41ece43d5325fc28";
-
+Boolean liveData = false;    // set true to get real data from api, false for testing
+Boolean logClockUpdateTime = false;
 
 volatile PixelArray PA;
 
@@ -50,18 +51,6 @@ PGraphics pg;
 // clock constants
 float outerRadius;
 float innerRadius;
-float hRadFront;
-float hRadBack;
-float hWidthFront;
-float hWidthBack;
-float mRadFront;
-float mRadBack;
-float mWidthFront;
-float mWidthBack;
-float sRadFront;
-float sRadBack;
-float sWidthFront;
-float sWidthBack;
 
 
 
@@ -77,42 +66,12 @@ void setup() {
   halfWidth = width/2;
   halfHeight = height/2;
   background(bgColor);
-  noFill();
-  stroke(255);
-  strokeWeight( 5);
-  millisOffset = hour()%12*60*60*1000 + minute()*60*1000 + second()*1000 - millis();
+
   
   clock = new Clock();
-  
-  
-  
+
   outerRadius = 0.65*width;
   innerRadius = -1;
-  borderWidth = 8;
-  hRadFront = 0.30*outerRadius;
-  hRadBack = 0.10*outerRadius;
-  hWidthFront = 0.08*outerRadius;
-  hWidthBack = 0.10*outerRadius;
-  mRadFront = 0.55*outerRadius;
-  mRadBack = 0.14*outerRadius;
-  mWidthFront = 0.06*outerRadius;
-  mWidthBack = 0.08*outerRadius;
-  sRadFront = 0.80*innerRadius;
-  sRadBack = 0.16*outerRadius;
-  sWidthFront = 0.02*outerRadius;
-  sWidthBack = 0.04*outerRadius;
-
-
-
-  
-  noFill();
-  strokeWeight(0.5*borderWidth);
-  stroke(bgColor);
-  //ellipse( 0.5*width , 0.5*height , 2*outerRadius , 2*outerRadius );
-  stroke(outlineColor);
-  //ellipse( 0.5*width , 0.5*height , 2*outerRadius-3 , 2*outerRadius-3 );
-  
-  
   
   PA = new PixelArray();
   fld0 = new float[PA.num];
@@ -222,61 +181,7 @@ void draw() {
   while( !colFlg_thread_doneRendering1 ) {}
   colFlg_thread_doneRendering1 = false;
   if( logOut ) { println( "frame: " , frameCount , "  time: " , millis() , "  RENDERDONE1" ); }
-  
-  /*
-  noStroke();
-  fill(outlineColor);
-  int t = millis() + millisOffset;
-  float sPart = float(t)/(60000)%1;
-  float mPart = float(t)/(3600000)%1;
-  float hPart = float(t)/(43200000)%1;
-  float sAng = (-0.25+sPart)*TWO_PI;
-  float mAng = (-0.25+mPart)*TWO_PI;
-  float hAng = (-0.25+hPart)*TWO_PI;
-
-  strokeWeight(0.5*borderWidth);
-  stroke(outlineColor);
-  noFill();
-  //ellipse( 0.5*width , 0.5*height , 2*outerRadius-borderWidth , 2*outerRadius-borderWidth );
-  //ellipse( 0.5*width , 0.5*height , 2*innerRadius , 2*innerRadius );
-  //line( 0.12*width , 0.5*borderWidth , 0.88*width , 0.5*borderWidth );
-  //line( 0.12*width , height-0.5*borderWidth , 0.88*width , height-0.5*borderWidth );
-  stroke(outlineColor);
-  fill(bgColor);
-  strokeWeight( borderWidth );
-  pushMatrix();
-  translate( halfWidth , halfHeight );
-  // hour
-  pushMatrix();
-  rotate( hAng );
-  stroke( outlineColor );
-  strokeWeight(borderWidth*3.5);
-  line( -hRadBack , 0 , hRadFront , 0 );
-  stroke( bgColor );
-  strokeWeight(borderWidth*2.5);
-  line( -hRadBack , 0 , hRadFront , 0 );
-  
-  //rect( -hRadBack , -0.5*hWidthFront , hRadBack+hRadFront , hWidthFront , cr , cr , cr , cr );
-  popMatrix();
-  // minute
-  pushMatrix();
-  rotate( mAng );
-  stroke( outlineColor );
-  strokeWeight(borderWidth*2.5);
-  line( -mRadBack , 0 , mRadFront , 0 );
-  stroke( bgColor );
-  strokeWeight(borderWidth*1.5);
-  line( -mRadBack , 0 , mRadFront , 0 );
-  //rect( -mRadBack , -0.5*mWidthFront , mRadBack+mRadFront , mWidthFront , cr , cr , cr , cr );
-  popMatrix();
-  // second
-  //pushMatrix();
-  //rotate( sAng );
-  //rect( -sRadBack , -0.5*sWidthFront , sRadBack+sRadFront , sWidthFront );
-  //popMatrix();
-  popMatrix();
-  */
-  
+ 
   colFlg_draw_goUpdate0 = true;
   while( !colFlag_thread_Updating0 ) {}
   colFlag_thread_Updating0 = false;
@@ -317,33 +222,42 @@ void draw() {
     println( "frameRate: " , frameRate );
   }
   
+  
+  if( second() != prevSecond ) {
+    prevSecond = second();
+    secondChanged = true;
+  }
   if( minute() != prevMin ) {
     prevMin = minute();
     minuteChanged = true;
   }
-  
   if( hour() != prevHour ) {
     prevHour = hour();
     hourChanged = true;
+    clock.updateWeather();
   }
   if( day() != prevDay ) {
     prevDay = day();
     dayChanged = true;
+    clock.updateAstronomy();
   }
     
   clock.drawClock();
   
 }
 
+int prevSecond = -1;
 int prevMin = -1;
 int prevHour = -1;
 int prevDay = -1;
+boolean secondChanged = false;
 boolean minuteChanged = false;
 boolean hourChanged = false;
 boolean dayChanged = false;
 boolean resetClock = false;
 
 void mousePressed() {
-  clock.nextClock();
+  if( mouseX >= halfWidth ) { clock.nextClock(); }
+  else { clock.prevClock(); }
   resetClock = true;
 }

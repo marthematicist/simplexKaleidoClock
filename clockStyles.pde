@@ -1,8 +1,11 @@
 
 class Clock {
+
+  int[] clockOrder = { 0 , 6 , 10 , 9 , 4 , 1 , 2 , 5 , 8 , 7 , 3 , 11 };
+  int numClocks = clockOrder.length;
+  int clockTicker = 0;
+  int clockID = clockOrder[clockTicker];
   
-  int clockID = 0;
-  int numClocks = 4;
   String API_URL_forecast ="http://api.wunderground.com/api/" + APIkey + "/forecast/q/" + zip + ".xml";
   String API_URL_astronomy ="http://api.wunderground.com/api/" + APIkey + "/astronomy/q/" + zip + ".xml";
   
@@ -26,6 +29,7 @@ class Clock {
   String day0_dateText;
   String day0_tempText;
   String day0_windText;
+  String day0_windTextMin;
   PImage icon0;
   PImage icon0Night;
   String day1_dayName;
@@ -38,6 +42,7 @@ class Clock {
   String day1_dateText;
   String day1_tempText;
   String day1_windText;
+  String day1_windTextMin;
   PImage icon1;
   String day2_dayName;
   String day2_dayNum;
@@ -49,6 +54,7 @@ class Clock {
   String day2_dateText;
   String day2_tempText;
   String day2_windText;
+  String day2_windTextMin;
   PImage icon2;
   String day3_dayName;
   String day3_dayNum;
@@ -60,6 +66,7 @@ class Clock {
   String day3_dateText;
   String day3_tempText;
   String day3_windText;
+  String day3_windTextMin;
   PImage icon3;
   
   // Astronomy variables
@@ -79,35 +86,493 @@ class Clock {
   }
   
   void nextClock() {
-    clockID++;
-    clockID %= numClocks;
+    clockTicker++;
+    clockTicker %= numClocks;
+    clockID = clockOrder[clockTicker];
+    println( "Current clockID = " + clockID );
+  }
+  void prevClock() {
+    clockTicker--;
+    if( clockTicker < 0 ) { clockTicker = numClocks - 1; }
+    clockID = clockOrder[clockTicker];
+    println( "Current clockID = " + clockID );
   }
   
   void drawClock() {
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // CLOCK TYPE 10 ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if( clockID == 10 ) {
+      if( minuteChanged || resetClock ) {
+        masterSpeed = 2;
+        minuteChanged = false;
+        resetClock = false;
+        
+        
+        pg.beginDraw();
+        pg.textAlign( LEFT , TOP );
+        // values
+        color bgColor = color( 0 , 0 , 0 , 160 );
+        color textColor = color( 255 , 255 , 255 , 196 );
+        String dateText = dayOfTheWeek(month(),day(),year()) + ", " + monthText[month()-1] + " " + day(); 
+        
+        pg.textFont(font1);
+        pg.clear();
+        pg.noStroke();
+
+        float weatherWidth = 100;
+        float weatherHeight = 0.24*height;
+        float weatherGap = (height-4*weatherHeight)/5.0;
+        float weatherX = width - 0.5*weatherWidth - weatherGap;
+        float weatherCorner = 4;
+        float day0_y = weatherGap*1+0.5*weatherHeight;
+        float day1_y = weatherGap*2+1.5*weatherHeight;
+        float day2_y = weatherGap*3+2.5*weatherHeight;
+        float day3_y = weatherGap*4+3.5*weatherHeight;
+        
+        pg.fill( bgColor );
+        pg.rect( weatherX - 0.5*weatherWidth , day0_y - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+        pg.rect( weatherX - 0.5*weatherWidth , day1_y - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+        pg.rect( weatherX - 0.5*weatherWidth , day2_y - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+        pg.rect( weatherX - 0.5*weatherWidth , day3_y - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+                 
+        float dayTextSize = 20;
+        float dayTextOffset = -45;
+        float iconOffset = -30;
+        float iconSize = icon0.width*0.7;
+        float tempTextSize = 20;
+        float tempTextOffset = 15;
+        float windTextSize = 14;
+        float windTextOffset = 40;
+        
+        
+        pg.fill( textColor );
+        pg.textAlign( CENTER , CENTER );
+        pg.textSize( dayTextSize );
+        pg.text( day0_dateText , weatherX , day0_y + dayTextOffset );
+        pg.text( day1_dateText , weatherX , day1_y + dayTextOffset );
+        pg.text( day2_dateText , weatherX , day2_y + dayTextOffset );
+        pg.text( day3_dateText , weatherX , day3_y + dayTextOffset );
+        pg.textSize( tempTextSize );
+        pg.text( day0_tempText , weatherX , day0_y + tempTextOffset );
+        pg.text( day1_tempText , weatherX , day1_y + tempTextOffset );
+        pg.text( day2_tempText , weatherX , day2_y + tempTextOffset );
+        pg.text( day3_tempText , weatherX , day3_y + tempTextOffset );
+        pg.textSize( windTextSize );
+        pg.text( day0_windTextMin , weatherX , day0_y + windTextOffset );
+        pg.text( day1_windTextMin , weatherX , day1_y + windTextOffset );
+        pg.text( day2_windTextMin , weatherX , day2_y + windTextOffset );
+        pg.text( day3_windTextMin , weatherX , day3_y + windTextOffset );
+        if( hour() >= sunsetHour - 1 ) {
+          pg.image( icon0Night , weatherX - 0.5*iconSize , day0_y + iconOffset , iconSize , iconSize);
+        } else {
+          pg.image( icon0 , weatherX - 0.5*iconSize , day0_y + iconOffset , iconSize , iconSize );
+        }
+        pg.image( icon1 , weatherX - 0.5*iconSize , day1_y + iconOffset , iconSize , iconSize );
+        pg.image( icon2 , weatherX - 0.5*iconSize , day2_y + iconOffset , iconSize , iconSize );
+        pg.image( icon3 , weatherX - 0.5*iconSize , day3_y + iconOffset , iconSize , iconSize );
+        
+        
+        float secondAngle = float(second())/60.0*TWO_PI;
+        float minuteAngle = float(minute())/60.0*TWO_PI + secondAngle/60.0;
+        float hourAngle = float(hour()%12)/12.0*TWO_PI + minuteAngle/60.0;
+        
+        float hourWidth = 12;
+        float hourLengthFront = 140;
+        float hourLengthBack = 30;
+        float minuteWidth = 10;
+        float minuteLengthFront = 170;
+        float minuteLengthBack = 35;
+        float shadowWidth = 4;
+        float numShadows = 4;
+        float shadowGrad = 4;
+        
+        color handColor = color( 255 , 255 , 255 , 255 );
+        color shadowColor = color( 0 , 0 , 0 , 64 );
+        color ridgeColor = color( 200 );
+        float ridgeWidth = 0.2;
+        
+        pg.pushMatrix();
+        
+        pg.translate( halfWidth , halfHeight );
+
+        pg.pushMatrix();
+        pg.rotate(hourAngle);
+        pg.stroke( shadowColor );
+        for( float i = 1 ; i < numShadows ; i++ ) {
+          pg.strokeWeight( hourWidth+shadowWidth+shadowGrad*i );
+          pg.line( 0 , -hourLengthFront - 0.25*shadowWidth , 0 , hourLengthBack + 0.25*shadowWidth );
+        }
+        pg.stroke( handColor );
+        pg.strokeWeight( hourWidth );
+        pg.line( 0 , -hourLengthFront , 0 , hourLengthBack );
+        pg.stroke(ridgeColor);
+        pg.strokeWeight( hourWidth*ridgeWidth );
+        pg.line( 0 , -hourLengthFront , 0 , hourLengthBack );
+        pg.popMatrix();
+        
+        pg.pushMatrix();
+        pg.rotate(minuteAngle);pg.stroke( shadowColor );
+        for( float i = 1 ; i < numShadows ; i++ ) {
+          pg.strokeWeight( minuteWidth+shadowWidth+shadowGrad*i );
+          pg.line( 0 , -minuteLengthFront - 0.25*shadowWidth , 0 , minuteLengthBack + 0.25*shadowWidth );
+        }
+        pg.stroke( handColor );
+        pg.strokeWeight( minuteWidth );
+        pg.line( 0 , -minuteLengthFront , 0 , minuteLengthBack );
+        pg.stroke(ridgeColor);
+        pg.strokeWeight( minuteWidth*ridgeWidth );
+        pg.line( 0 , -minuteLengthFront , 0 , minuteLengthBack );
+        pg.popMatrix();
+        
+        
+        pg.popMatrix();
+        
+        pg.endDraw();
+        if( logClockUpdateTime) { println(dateText + " " +hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) ); }
+      }
+      image(pg , 0 , 0 );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // CLOCK TYPE 9 ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if( clockID == 9 ) {
+      if( secondChanged || resetClock ) {
+        masterSpeed = 2;
+        secondChanged = false;
+        resetClock = false;
+        
+        
+        pg.beginDraw();
+        pg.textAlign( LEFT , TOP );
+        // values
+        color bgColor = color( 0 , 0 , 0 , 160 );
+        color textColor = color( 255 , 255 , 255 , 196 );;
+        String dateText = dayOfTheWeek(month(),day(),year()) + ", " + monthText[month()-1] + " " + day(); 
+        
+        
+        pg.clear();
+        pg.noStroke();
+                    
+        
+        float weatherWidth = 100;
+        float weatherHeight = 0.24*height;
+        float weatherGap = (height-4*weatherHeight)/5.0;
+        float weatherX = width - 0.5*weatherWidth - weatherGap;
+        float weatherCorner = 4;
+        float day0_y = weatherGap*1+0.5*weatherHeight;
+        float day1_y = weatherGap*2+1.5*weatherHeight;
+        float day2_y = weatherGap*3+2.5*weatherHeight;
+        float day3_y = weatherGap*4+3.5*weatherHeight;
+        
+        pg.fill( bgColor );
+        pg.rect( weatherX - 0.5*weatherWidth , day0_y - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+        pg.rect( weatherX - 0.5*weatherWidth , day1_y - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+        pg.rect( weatherX - 0.5*weatherWidth , day2_y - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+        pg.rect( weatherX - 0.5*weatherWidth , day3_y - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+                 
+        float dayTextSize = 20;
+        float dayTextOffset = -45;
+        float iconOffset = -30;
+        float iconSize = icon0.width*0.7;
+        float tempTextSize = 20;
+        float tempTextOffset = 15;
+        float windTextSize = 14;
+        float windTextOffset = 40;
+        
+        
+        pg.fill( textColor );
+        pg.textAlign( CENTER , CENTER );
+        pg.textSize( dayTextSize );
+        pg.text( day0_dateText , weatherX , day0_y + dayTextOffset );
+        pg.text( day1_dateText , weatherX , day1_y + dayTextOffset );
+        pg.text( day2_dateText , weatherX , day2_y + dayTextOffset );
+        pg.text( day3_dateText , weatherX , day3_y + dayTextOffset );
+        pg.textSize( tempTextSize );
+        pg.text( day0_tempText , weatherX , day0_y + tempTextOffset );
+        pg.text( day1_tempText , weatherX , day1_y + tempTextOffset );
+        pg.text( day2_tempText , weatherX , day2_y + tempTextOffset );
+        pg.text( day3_tempText , weatherX , day3_y + tempTextOffset );
+        pg.textSize( windTextSize );
+        pg.text( day0_windTextMin , weatherX , day0_y + windTextOffset );
+        pg.text( day1_windTextMin , weatherX , day1_y + windTextOffset );
+        pg.text( day2_windTextMin , weatherX , day2_y + windTextOffset );
+        pg.text( day3_windTextMin , weatherX , day3_y + windTextOffset );
+        if( hour() >= sunsetHour - 1 ) {
+          pg.image( icon0Night , weatherX - 0.5*iconSize , day0_y + iconOffset , iconSize , iconSize);
+        } else {
+          pg.image( icon0 , weatherX - 0.5*iconSize , day0_y + iconOffset , iconSize , iconSize );
+        }
+        pg.image( icon1 , weatherX - 0.5*iconSize , day1_y + iconOffset , iconSize , iconSize );
+        pg.image( icon2 , weatherX - 0.5*iconSize , day2_y + iconOffset , iconSize , iconSize );
+        pg.image( icon3 , weatherX - 0.5*iconSize , day3_y + iconOffset , iconSize , iconSize );
+        
+        
+        float secondAngle = float(second())/60.0*TWO_PI;
+        float minuteAngle = float(minute())/60.0*TWO_PI + secondAngle/60.0;
+        float hourAngle = float(hour()%12)/12.0*TWO_PI + minuteAngle/60.0;
+        
+        float hourWidth = 12;
+        float hourLengthFront = 140;
+        float hourLengthBack = 30;
+        float minuteWidth = 10;
+        float minuteLengthFront = 170;
+        float minuteLengthBack = 35;
+        float secondWidth = 6;
+        float secondLengthFront = 210;
+        float secondLengthBack = 40;
+        float shadowWidth = 4;
+        float numShadows = 4;
+        float shadowGrad = 4;
+        
+        color handColor = color( 255 , 255 , 255 , 255 );
+        color shadowColor = color( 0 , 0 , 0 , 64 );
+        color ridgeColor = color( 200 );
+        float ridgeWidth = 0.2;
+        
+        pg.pushMatrix();
+        
+        pg.translate( halfWidth , halfHeight );
+
+        pg.pushMatrix();
+        pg.rotate(hourAngle);
+        pg.stroke( shadowColor );
+        for( float i = 1 ; i < numShadows ; i++ ) {
+          pg.strokeWeight( hourWidth+shadowWidth+shadowGrad*i );
+          pg.line( 0 , -hourLengthFront - 0.25*shadowWidth , 0 , hourLengthBack + 0.25*shadowWidth );
+        }
+        pg.stroke( handColor );
+        pg.strokeWeight( hourWidth );
+        pg.line( 0 , -hourLengthFront , 0 , hourLengthBack );
+        pg.stroke(ridgeColor);
+        pg.strokeWeight( hourWidth*ridgeWidth );
+        pg.line( 0 , -hourLengthFront , 0 , hourLengthBack );
+        pg.popMatrix();
+        
+        pg.pushMatrix();
+        pg.rotate(minuteAngle);pg.stroke( shadowColor );
+        for( float i = 1 ; i < numShadows ; i++ ) {
+          pg.strokeWeight( minuteWidth+shadowWidth+shadowGrad*i );
+          pg.line( 0 , -minuteLengthFront - 0.25*shadowWidth , 0 , minuteLengthBack + 0.25*shadowWidth );
+        }
+        pg.stroke( handColor );
+        pg.strokeWeight( minuteWidth );
+        pg.line( 0 , -minuteLengthFront , 0 , minuteLengthBack );
+        pg.stroke(ridgeColor);
+        pg.strokeWeight( minuteWidth*ridgeWidth );
+        pg.line( 0 , -minuteLengthFront , 0 , minuteLengthBack );
+        pg.popMatrix();
+        
+        pg.pushMatrix();
+        pg.rotate(secondAngle);
+        pg.stroke( shadowColor );
+        for( float i = 1 ; i < numShadows ; i++ ) {
+          pg.strokeWeight( secondWidth+shadowWidth+shadowGrad*i );
+          pg.line( 0 , -secondLengthFront - 0.25*shadowWidth , 0 , secondLengthBack + 0.25*shadowWidth );
+        }
+        pg.stroke( handColor );
+        pg.strokeWeight( secondWidth );
+        pg.line( 0 , -secondLengthFront , 0 , secondLengthBack );
+        pg.stroke(ridgeColor);
+        pg.strokeWeight( secondWidth*ridgeWidth );
+        pg.line( 0 , -secondLengthFront , 0 , secondLengthBack );
+        pg.popMatrix();
+        
+        pg.popMatrix();
+        
+        pg.endDraw();
+        if( logClockUpdateTime) { println(dateText + " " +hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) ); }
+      }
+      image(pg , 0 , 0 );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // CLOCK TYPE 7 ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if( clockID == 7 ) {
+      if( secondChanged || resetClock ) {
+        masterSpeed = 2;
+        secondChanged = false;
+        resetClock = false;
+        
+        pg.beginDraw();
+        //pg.strokeCap( SQUARE );
+        pg.clear();
+        float secondAngle = float(second())/60.0*TWO_PI;
+        float minuteAngle = float(minute())/60.0*TWO_PI + secondAngle/60.0;
+        float hourAngle = float(hour()%12)/12.0*TWO_PI + minuteAngle/60.0;
+        
+        float hourWidth = 12;
+        float hourLengthFront = 140;
+        float hourLengthBack = 30;
+        float minuteWidth = 10;
+        float minuteLengthFront = 170;
+        float minuteLengthBack = 35;
+        float secondWidth = 6;
+        float secondLengthFront = 210;
+        float secondLengthBack = 40;
+        float shadowWidth = 4;
+        float numShadows = 4;
+        float shadowGrad = 4;
+        
+        color handColor = color( 255 , 255 , 255 , 255 );
+        color shadowColor = color( 0 , 0 , 0 , 64 );
+        color ridgeColor = color( 200 );
+        float ridgeWidth = 0.2;
+        
+        pg.pushMatrix();
+        
+        pg.translate( halfWidth , halfHeight );
+
+        pg.pushMatrix();
+        pg.rotate(hourAngle);
+        pg.stroke( shadowColor );
+        for( float i = 1 ; i < numShadows ; i++ ) {
+          pg.strokeWeight( hourWidth+shadowWidth+shadowGrad*i );
+          pg.line( 0 , -hourLengthFront - 0.25*shadowWidth , 0 , hourLengthBack + 0.25*shadowWidth );
+        }
+        pg.stroke( handColor );
+        pg.strokeWeight( hourWidth );
+        pg.line( 0 , -hourLengthFront , 0 , hourLengthBack );
+        pg.stroke(ridgeColor);
+        pg.strokeWeight( hourWidth*ridgeWidth );
+        pg.line( 0 , -hourLengthFront , 0 , hourLengthBack );
+        pg.popMatrix();
+        
+        pg.pushMatrix();
+        pg.rotate(minuteAngle);pg.stroke( shadowColor );
+        for( float i = 1 ; i < numShadows ; i++ ) {
+          pg.strokeWeight( minuteWidth+shadowWidth+shadowGrad*i );
+          pg.line( 0 , -minuteLengthFront - 0.25*shadowWidth , 0 , minuteLengthBack + 0.25*shadowWidth );
+        }
+        pg.stroke( handColor );
+        pg.strokeWeight( minuteWidth );
+        pg.line( 0 , -minuteLengthFront , 0 , minuteLengthBack );
+        pg.stroke(ridgeColor);
+        pg.strokeWeight( minuteWidth*ridgeWidth );
+        pg.line( 0 , -minuteLengthFront , 0 , minuteLengthBack );
+        pg.popMatrix();
+        
+        pg.pushMatrix();
+        pg.rotate(secondAngle);
+        pg.stroke( shadowColor );
+        for( float i = 1 ; i < numShadows ; i++ ) {
+          pg.strokeWeight( secondWidth+shadowWidth+shadowGrad*i );
+          pg.line( 0 , -secondLengthFront - 0.25*shadowWidth , 0 , secondLengthBack + 0.25*shadowWidth );
+        }
+        pg.stroke( handColor );
+        pg.strokeWeight( secondWidth );
+        pg.line( 0 , -secondLengthFront , 0 , secondLengthBack );
+        pg.stroke(ridgeColor);
+        pg.strokeWeight( secondWidth*ridgeWidth );
+        pg.line( 0 , -secondLengthFront , 0 , secondLengthBack );
+        pg.popMatrix();
+        
+        pg.popMatrix();
+        
+        pg.endDraw();
+        if( logClockUpdateTime) { println(hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) ); }
+      }
+      image( pg , 0 , 0 );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // CLOCK TYPE 8 ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if( clockID == 8 ) {
+      if( minuteChanged || resetClock ) {
+        masterSpeed = 2;
+        minuteChanged = false;
+        resetClock = false;
+        
+        pg.beginDraw();
+        //pg.strokeCap( SQUARE );
+        pg.clear();
+        float secondAngle = float(second())/60.0*TWO_PI;
+        float minuteAngle = float(minute())/60.0*TWO_PI + secondAngle/60.0;
+        float hourAngle = float(hour()%12)/12.0*TWO_PI + minuteAngle/60.0;
+        
+        float hourWidth = 12;
+        float hourLengthFront = 140;
+        float hourLengthBack = 30;
+        float minuteWidth = 10;
+        float minuteLengthFront = 170;
+        float minuteLengthBack = 35;
+        float shadowWidth = 4;
+        float numShadows = 4;
+        float shadowGrad = 4;
+        
+        color handColor = color( 255 , 255 , 255 , 255 );
+        color shadowColor = color( 0 , 0 , 0 , 64 );
+        color ridgeColor = color( 200 );
+        float ridgeWidth = 0.2;
+        
+        pg.pushMatrix();
+        
+        pg.translate( halfWidth , halfHeight );
+
+        pg.pushMatrix();
+        pg.rotate(hourAngle);
+        pg.stroke( shadowColor );
+        for( float i = 1 ; i < numShadows ; i++ ) {
+          pg.strokeWeight( hourWidth+shadowWidth+shadowGrad*i );
+          pg.line( 0 , -hourLengthFront - 0.25*shadowWidth , 0 , hourLengthBack + 0.25*shadowWidth );
+        }
+        pg.stroke( handColor );
+        pg.strokeWeight( hourWidth );
+        pg.line( 0 , -hourLengthFront , 0 , hourLengthBack );
+        pg.stroke(ridgeColor);
+        pg.strokeWeight( hourWidth*ridgeWidth );
+        pg.line( 0 , -hourLengthFront , 0 , hourLengthBack );
+        pg.popMatrix();
+        
+        pg.pushMatrix();
+        pg.rotate(minuteAngle);pg.stroke( shadowColor );
+        for( float i = 1 ; i < numShadows ; i++ ) {
+          pg.strokeWeight( minuteWidth+shadowWidth+shadowGrad*i );
+          pg.line( 0 , -minuteLengthFront - 0.25*shadowWidth , 0 , minuteLengthBack + 0.25*shadowWidth );
+        }
+        pg.stroke( handColor );
+        pg.strokeWeight( minuteWidth );
+        pg.line( 0 , -minuteLengthFront , 0 , minuteLengthBack );
+        pg.stroke(ridgeColor);
+        pg.strokeWeight( minuteWidth*ridgeWidth );
+        pg.line( 0 , -minuteLengthFront , 0 , minuteLengthBack );
+        pg.popMatrix();
+        
+        pg.popMatrix();
+        
+        pg.endDraw();
+        if( logClockUpdateTime) { println(hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) ); }
+      }
+      image( pg , 0 , 0 );
+    }
+    
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // CLOCK TYPE 0 ///////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 0 ) {
       if( minuteChanged || resetClock ) {
+        masterSpeed = 2;
         minuteChanged = false;
         resetClock = false;
-        
-        if( hourChanged ) {
-          hourChanged = false;
-          updateWeather();
-        }
-        
-        if( dayChanged ) {
-          dayChanged = false;
-          updateAstronomy();
-        }
         
         pg.beginDraw();
         pg.textAlign( LEFT , TOP );
         // values
-        float timeCorner = 20;
-        float dateCorner = 10;
+        float timeCorner = 4;
+        float dateCorner = 4;
         color bgColor = color( 0 , 0 , 0 , 160 );
         color textColor = color( 255 , 255 , 255 , 196 );
         float timeBorderX = 10;
@@ -119,7 +584,7 @@ class Clock {
         float dateX = halfWidth;
         float dateY = height*0.05;
         float timeTextSize = 100;
-        float ampmTextSize = 20;
+        float ampmTextSize = 30;
         float dateTextSize = 20;
         float vertOffset = 0.6;
         float ampmOffset = -1;
@@ -164,7 +629,7 @@ class Clock {
         float weatherHeight = 0.30*height;
         float weatherGap = (width-4*weatherWidth)/5.0;
         float weatherY = 0.83*height;
-        float weatherCorner = 10;
+        float weatherCorner = 4;
         float day0_x = weatherGap*1+0.5*weatherWidth;
         float day1_x = weatherGap*2+1.5*weatherWidth;
         float day2_x = weatherGap*3+2.5*weatherWidth;
@@ -217,7 +682,138 @@ class Clock {
         
         
         pg.endDraw();
-        println(dateText + " " +hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
+        if( logClockUpdateTime) { println(dateText + " " +hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) ); }
+      }
+      image(pg , 0 , 0 );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // CLOCK TYPE 6 ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if( clockID == 6 ) {
+      if( minuteChanged || resetClock ) {
+        masterSpeed = 2;
+        minuteChanged = false;
+        resetClock = false;
+        
+        pg.beginDraw();
+        pg.textAlign( LEFT , TOP );
+        // values
+        float timeCorner = 4;
+        float dateCorner = 4;
+        color bgColor = color( 0 , 0 , 0 , 160 );
+        color textColor = color( 255 , 255 , 255 , 196 );
+        
+        float timeTextSize = 60;
+        float ampmTextSize = 30;
+        float dateTextSize = 20;
+        float vertOffset = 0.6;
+        float ampmOffset = -1;
+        float dateOffset = -4;
+        String timeText = hour()%12 + ":" + nf(minute(),2);
+        if( hour()%12 == 0 ) {
+          timeText = "12:" + nf(minute(),2);
+        }
+        String ampmText = " am";
+        if( hour() > 12 ) { ampmText = " pm"; }
+        String dateText = dayOfTheWeek(month(),day(),year()) + ", " + monthText[month()-1] + " " + day(); 
+        
+        pg.textFont(font1);
+        pg.textSize( timeTextSize );
+        float timeTextWidth = pg.textWidth( timeText );
+        pg.textSize( ampmTextSize );
+        float ampmTextWidth = pg.textWidth( ampmText );
+        pg.textSize( dateTextSize );
+        float dateTextWidth = pg.textWidth( dateText );
+        
+        float timeBorderX = 10;
+        float timeBorderY = 0;
+        float timeX = 4+0.5*(timeTextWidth+ampmTextWidth)+timeBorderX;
+        float timeY = 4+0.5*(timeTextSize+timeBorderY);
+        float dateBorderX = 10;
+        float dateBorderY = 5;
+        float dateX = 4+0.5*(dateTextWidth)+dateBorderX;;
+        float dateY = height - ( 6+0.5*(dateTextSize+dateBorderY) );
+        
+        pg.clear();
+        pg.noStroke();
+        pg.fill( bgColor );
+        pg.rect( timeX - 0.5*(timeTextWidth+ampmTextWidth)-timeBorderX , timeY - 0.5*timeTextSize - timeBorderY , 
+                 timeTextWidth+ampmTextWidth + 2*timeBorderX , timeTextSize + 2*timeBorderY , timeCorner , timeCorner , timeCorner , timeCorner );
+        pg.fill( textColor );
+        pg.textSize( timeTextSize );
+        pg.text( timeText ,  timeX-0.5*(timeTextWidth+ampmTextWidth) , timeY - vertOffset*timeTextSize ); 
+        pg.textSize( ampmTextSize );
+        pg.text( ampmText ,  timeX-0.5*(timeTextWidth+ampmTextWidth)+timeTextWidth , 
+                 timeY - vertOffset*timeTextSize + (timeTextSize-ampmTextSize) + ampmOffset ); 
+                 
+        pg.fill( bgColor );
+        pg.rect( dateX - 0.5*(dateTextWidth)-timeBorderX , dateY - 0.5*dateTextSize - dateBorderY , 
+                 dateTextWidth + 2*dateBorderX , dateTextSize + 2*dateBorderY , dateCorner , dateCorner , dateCorner , dateCorner );
+        pg.fill( textColor );
+        pg.textSize( dateTextSize );
+        pg.text( dateText ,  dateX-0.5*(dateTextWidth) , dateY - 0.5*dateTextSize + dateOffset ); 
+                 
+        
+        float weatherWidth = 100;
+        float weatherHeight = 0.24*height;
+        float weatherGap = (height-4*weatherHeight)/5.0;
+        float weatherX = width - 0.5*weatherWidth - weatherGap;
+        float weatherCorner = 4;
+        float day0_y = weatherGap*1+0.5*weatherHeight;
+        float day1_y = weatherGap*2+1.5*weatherHeight;
+        float day2_y = weatherGap*3+2.5*weatherHeight;
+        float day3_y = weatherGap*4+3.5*weatherHeight;
+        
+        pg.fill( bgColor );
+        pg.rect( weatherX - 0.5*weatherWidth , day0_y - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+        pg.rect( weatherX - 0.5*weatherWidth , day1_y - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+        pg.rect( weatherX - 0.5*weatherWidth , day2_y - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+        pg.rect( weatherX - 0.5*weatherWidth , day3_y - 0.5*weatherHeight , weatherWidth , weatherHeight ,
+                 weatherCorner , weatherCorner , weatherCorner , weatherCorner );
+                 
+        float dayTextSize = 20;
+        float dayTextOffset = -45;
+        float iconOffset = -30;
+        float iconSize = icon0.width*0.7;
+        float tempTextSize = 20;
+        float tempTextOffset = 15;
+        float windTextSize = 14;
+        float windTextOffset = 40;
+        
+        
+        pg.fill( textColor );
+        pg.textAlign( CENTER , CENTER );
+        pg.textSize( dayTextSize );
+        pg.text( day0_dateText , weatherX , day0_y + dayTextOffset );
+        pg.text( day1_dateText , weatherX , day1_y + dayTextOffset );
+        pg.text( day2_dateText , weatherX , day2_y + dayTextOffset );
+        pg.text( day3_dateText , weatherX , day3_y + dayTextOffset );
+        pg.textSize( tempTextSize );
+        pg.text( day0_tempText , weatherX , day0_y + tempTextOffset );
+        pg.text( day1_tempText , weatherX , day1_y + tempTextOffset );
+        pg.text( day2_tempText , weatherX , day2_y + tempTextOffset );
+        pg.text( day3_tempText , weatherX , day3_y + tempTextOffset );
+        pg.textSize( windTextSize );
+        pg.text( day0_windTextMin , weatherX , day0_y + windTextOffset );
+        pg.text( day1_windTextMin , weatherX , day1_y + windTextOffset );
+        pg.text( day2_windTextMin , weatherX , day2_y + windTextOffset );
+        pg.text( day3_windTextMin , weatherX , day3_y + windTextOffset );
+        if( hour() >= sunsetHour - 1 ) {
+          pg.image( icon0Night , weatherX - 0.5*iconSize , day0_y + iconOffset , iconSize , iconSize);
+        } else {
+          pg.image( icon0 , weatherX - 0.5*iconSize , day0_y + iconOffset , iconSize , iconSize );
+        }
+        pg.image( icon1 , weatherX - 0.5*iconSize , day1_y + iconOffset , iconSize , iconSize );
+        pg.image( icon2 , weatherX - 0.5*iconSize , day2_y + iconOffset , iconSize , iconSize );
+        pg.image( icon3 , weatherX - 0.5*iconSize , day3_y + iconOffset , iconSize , iconSize );
+        
+        
+        pg.endDraw();
+        if( logClockUpdateTime) { println(dateText + " " +hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) ); }
       }
       image(pg , 0 , 0 );
     }
@@ -227,12 +823,13 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 1 ) {
       if( minuteChanged || resetClock ) {
+        masterSpeed = 2;
         minuteChanged = false;
         resetClock = false;
         pg.beginDraw();
         pg.textAlign( LEFT , TOP );
         // values
-        float timeCorner = 20;
+        float timeCorner = 6;
         color bgColor = color( 0 , 0 , 0 , 160 );
         color textColor = color( 255 , 255 , 255 , 196 );
         float timeBorderX = 10;
@@ -268,7 +865,7 @@ class Clock {
         pg.text( ampmText ,  timeX-0.5*(timeTextWidth+ampmTextWidth)+timeTextWidth , 
                  timeY - vertOffset*timeTextSize + (timeTextSize-ampmTextSize) + ampmOffset ); 
         pg.endDraw();
-        println(hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
+        if( logClockUpdateTime) { println(hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) ); }
       }
       image(pg , 0 , 0 );
     }
@@ -278,20 +875,21 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 2  ) {
       if(  minuteChanged || resetClock ) {
+        masterSpeed = 2;
         minuteChanged = false;
         resetClock = false;
         pg.beginDraw();
         pg.textAlign( LEFT , TOP );
         // values
-        float timeCorner = 40;
+        float timeCorner = 10;
         color bgColor = color( 0 , 0 , 0 , 160 );
         color textColor = color( 255 , 255 , 255 , 196 );
+        float timeTextSize = 200;
+        float ampmTextSize = 40;
         float timeBorderX = 10;
         float timeBorderY = -10;
         float timeX = halfWidth;
         float timeY = halfHeight;
-        float timeTextSize = 200;
-        float ampmTextSize = 40;
         float vertOffset = 0.6;
         float ampmOffset = -10;
         String timeText = hour()%12 + ":" + nf(minute(),2);
@@ -319,7 +917,7 @@ class Clock {
         pg.text( ampmText ,  timeX-0.5*(timeTextWidth+ampmTextWidth)+timeTextWidth , 
                  timeY - vertOffset*timeTextSize + (timeTextSize-ampmTextSize) + ampmOffset ); 
         pg.endDraw();
-        println(hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
+        if( logClockUpdateTime) { println(hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) ); }
       }
       image(pg , 0 , 0 );
     }
@@ -328,6 +926,19 @@ class Clock {
     // CLOCK TYPE 3 ///////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 3 ) {
+      if( resetClock ) {
+        masterSpeed = 2;
+      }
+      // no clock
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // CLOCK TYPE 11 //////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if( clockID == 11 ) {
+      if( resetClock ) {
+        masterSpeed = 4;
+      }
       // no clock
     }
     
@@ -336,28 +947,29 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 4 ) {
       if( minuteChanged || resetClock ) {
+        masterSpeed = 2;
         resetClock = false;
         minuteChanged = false;
         pg.beginDraw();
         pg.textAlign( LEFT , TOP );
         // values
-        float timeCorner = 20;
-        float dateCorner = 10;
+        float timeCorner = 6;
+        float dateCorner = 4;
+        float timeTextSize = 80;
+        float ampmTextSize = 30;
+        float dateTextSize = 30;
         color bgColor = color( 0 , 0 , 0 , 160 );
         color textColor = color( 255 , 255 , 255 , 196 );
         float timeBorderX = 10;
-        float timeBorderY = 0;
+        float timeBorderY = -2;
         float timeX = halfWidth;
-        float timeY = halfHeight;
+        float timeY = 6 + 0.5*timeTextSize + timeBorderY;
         float dateBorderX = 10;
         float dateBorderY = 5;
         float dateX = halfWidth;
-        float dateY = height*0.8;
-        float timeTextSize = 100;
-        float ampmTextSize = 40;
-        float dateTextSize = 40;
+        float dateY = height - (6 + 0.5*dateTextSize + dateBorderY);
         float vertOffset = 0.6;
-        float ampmOffset = -10;
+        float ampmOffset = 0;
         float dateOffset = -4;
         String timeText = hour()%12 + ":" + nf(minute(),2);
         if( hour()%12 == 0 ) {
@@ -396,7 +1008,7 @@ class Clock {
                  
         
         pg.endDraw();
-        println(dateText + " " +hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
+        if( logClockUpdateTime) { println(dateText + " " +hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) ); }
       }
       image(pg , 0 , 0 );
     }
@@ -406,13 +1018,14 @@ class Clock {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if( clockID == 5  ) {
       if( minuteChanged || resetClock ) {
+        masterSpeed = 2;
         resetClock = false;
         minuteChanged = false;
         pg.beginDraw();
         pg.textAlign( LEFT , TOP );
         // values
-        float timeCorner = 20;
-        float dateCorner = 10;
+        float timeCorner = 12;
+        float dateCorner = 6;
         color bgColor = color( 0 , 0 , 0 , 160 );
         color textColor = color( 255 , 255 , 255 , 196 );
         float timeBorderX = 10;
@@ -422,7 +1035,7 @@ class Clock {
         float dateBorderX = 10;
         float dateBorderY = 5;
         float dateX = halfWidth;
-        float dateY = height*0.9;
+        float dateY = height*0.75;
         float timeTextSize = 200;
         float ampmTextSize = 40;
         float dateTextSize = 40;
@@ -466,7 +1079,7 @@ class Clock {
                  
         
         pg.endDraw();
-        println(dateText + " " +hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
+        if( logClockUpdateTime) { println(dateText + " " +hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) ); }
       }
       image(pg , 0 , 0 );
     }
@@ -475,17 +1088,28 @@ class Clock {
   }
   
   void updateAstronomy() {
-    astro = loadXML( API_URL_astronomy );
+    if( liveData ) {
+      astro = loadXML( API_URL_astronomy );
+    } else {
+      astro = loadXML("98264-sunrise.xml");
+    }
+    
     sunriseHour = Integer.parseInt(astro.getChild("sun_phase/sunrise/hour").getContent("hour"));
     sunsetHour = Integer.parseInt(astro.getChild("sun_phase/sunset/hour").getContent("hour"));
-    println("---");
+    println( "---------------" );
     println( "sunriseHour = " + sunriseHour + "  ;  sunsetHour = " + sunsetHour );
     println("UPDATED ASTRONOMY AT " + hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
     println( API_URL_astronomy );
+    println( "---------------" );
   }
   
   void updateWeather() {
-    w = loadXML( API_URL_forecast );
+    if( liveData ) {
+      w = loadXML( API_URL_forecast );
+    } else {
+      w =  loadXML("98264-temp.xml");
+    }
+    println( "---------------" );
     day0_dayName = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("date/weekday_short").getContent("weekday_short");
     day0_dayNum = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("date/day").getContent("day");
     day0_high = w.getChild("forecast/simpleforecast/forecastdays").getChild(1).getChild("high/fahrenheit").getContent("fahrenheit");
@@ -499,6 +1123,7 @@ class Clock {
     day0_dateText = ( day0_dayName + " | " + day0_dayNum );
     day0_tempText = ( day0_high + " | " + day0_low );
     day0_windText = ( day0_winddir + " at " + day0_windavg + " mph" );
+    day0_windTextMin = ( day0_winddir + " at " + day0_windavg );
     println( day0_dayName + " , " + day0_dayNum );
     println( day0_high + " | " + day0_low );
     println( day0_icon_url );
@@ -516,6 +1141,7 @@ class Clock {
     day1_dateText = ( day1_dayName + " | " + day1_dayNum );
     day1_tempText = ( day1_high + " | " + day1_low );
     day1_windText = ( day1_winddir + " at " + day1_windavg + " mph" );
+    day1_windTextMin = ( day1_winddir + " at " + day1_windavg );
     println( day1_dayName + " , " + day1_dayNum );
     println( "hi: " + day1_high + " | lo: " + day1_low );
     println( day1_icon_url );
@@ -533,6 +1159,7 @@ class Clock {
     day2_dateText = ( day2_dayName + " | " + day2_dayNum );
     day2_tempText = ( day2_high + " | " + day2_low );
     day2_windText = ( day2_winddir + " at " + day2_windavg + " mph" );
+    day2_windTextMin = ( day2_winddir + " at " + day2_windavg );
     println( day2_dayName + " , " + day2_dayNum );
     println( "high: " + day2_high + " | low: " + day2_low );
     println( day2_icon_url );
@@ -550,14 +1177,15 @@ class Clock {
     day3_dateText = ( day3_dayName + " | " + day3_dayNum );
     day3_tempText = ( day3_high + " | " + day3_low );
     day3_windText = ( day3_winddir + " at " + day3_windavg + " mph" );
+    day3_windTextMin = ( day3_winddir + " at " + day3_windavg );
     println( day3_dayName + " , " + day3_dayNum );
     println( "high: " + day3_high + " | low: " + day3_low );
     println( day3_icon_url );
     println( day3_winddir + " at " + day3_windavg + " mph" );
     println( "-----" );
-    
     println("UPDATED WEATHER AT " + hour() + ":" + nf(minute(),2) + ":" + nf(second(),2) );
     println( API_URL_forecast );
+    println( "---------------" );
     
   }
   
