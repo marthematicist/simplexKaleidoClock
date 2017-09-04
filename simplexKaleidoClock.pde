@@ -1,4 +1,6 @@
-import java.util.Calendar;
+String zip = "43202";
+String APIkey = "41ece43d5325fc28";
+
 
 volatile PixelArray PA;
 
@@ -60,12 +62,13 @@ float sRadFront;
 float sRadBack;
 float sWidthFront;
 float sWidthBack;
-float cr;
 
 
 
 float borderWidth;
 int millisOffset; 
+
+Clock clock;
 
 void setup() {
   //frameRate(25);
@@ -78,6 +81,9 @@ void setup() {
   stroke(255);
   strokeWeight( 5);
   millisOffset = hour()%12*60*60*1000 + minute()*60*1000 + second()*1000 - millis();
+  
+  clock = new Clock();
+  
   
   
   outerRadius = 0.65*width;
@@ -95,7 +101,7 @@ void setup() {
   sRadBack = 0.16*outerRadius;
   sWidthFront = 0.02*outerRadius;
   sWidthBack = 0.04*outerRadius;
-  cr = 0.02*outerRadius;
+
 
 
   
@@ -307,39 +313,31 @@ void draw() {
   while( !colFlag_thread_loopComplete1 ) {}
   colFlag_thread_loopComplete1 = false;
   
-  if( frameCount%60 == 0 ) {
+  if( frameCount%200 == 0 ) {
     println( "frameRate: " , frameRate );
   }
   
   if( minute() != prevMin ) {
     prevMin = minute();
-  cr = 20;
-  pg.beginDraw();
-  pg.clear();
-  pg.stroke(255);
-  pg.noStroke();
-  pg.strokeWeight( 5 );
-  pg.fill( 0 , 0 , 0 , 128 );
-  pg.textAlign(CENTER , CENTER);
-  pg.rectMode( CENTER );
-  pg.textSize(100);
-  String timeText = hour()%12 + ":" + nf(minute(),2) + " pm ";
-  pg.rect( halfWidth , halfHeight , pg.textWidth(timeText) , 120 , cr , cr , cr , cr );
-  
-  pg.fill(255 , 255 , 255 , 225);
-  pg.text( timeText ,  halfWidth , halfHeight-15 ); 
-  
-  pg.endDraw();
+    minuteChanged = true;
   }
-  image(pg , 0 , 0 );
   
-  
-  
-  
-  
-  println( dayOfTheWeek( 1 , 23 , 3001 ) );
-  
+  if( hour() != prevHour ) {
+    prevHour = hour();
+    hourChanged = true;
+  }
+    
+  clock.drawClock();
   
 }
 
-int prevMin=-1;
+int prevMin = -1;
+int prevHour = -1;
+boolean minuteChanged = true;
+boolean hourChanged = true;
+boolean resetClock = true;
+
+void mousePressed() {
+  clock.nextClock();
+  resetClock = true;
+}
