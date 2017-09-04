@@ -1,6 +1,6 @@
 String zip = "98264";
 String APIkey = "41ece43d5325fc28";
-Boolean liveData = false;    // set true to get real data from api, false for testing
+Boolean liveData = true;    // set true to get real data from api, false for testing
 Boolean logClockUpdateTime = false;
 
 volatile PixelArray PA;
@@ -129,12 +129,8 @@ void setup() {
   thread( "threadCCalc1" );
 }
 
-
-
-
 boolean logOut = false;
 void draw() {
-  println( "testing" );
   background(bgColor);
   
   if( logOut ) { println( "frame: " , frameCount , "  time: " , millis() , "  FRAMESTART" ); }
