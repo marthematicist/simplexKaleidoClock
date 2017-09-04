@@ -134,6 +134,7 @@ void setup() {
 
 boolean logOut = false;
 void draw() {
+  println( "testing" );
   background(bgColor);
   
   if( logOut ) { println( "frame: " , frameCount , "  time: " , millis() , "  FRAMESTART" ); }
