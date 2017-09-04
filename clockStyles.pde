@@ -99,7 +99,7 @@ class Clock {
         }
         
         if( dayChanged ) {
-          dayChanged = true;
+          dayChanged = false;
           updateAstronomy();
         }
         
@@ -125,6 +125,9 @@ class Clock {
         float ampmOffset = -1;
         float dateOffset = -4;
         String timeText = hour()%12 + ":" + nf(minute(),2);
+        if( hour()%12 == 0 ) {
+          timeText = "12:" + nf(minute(),2);
+        }
         String ampmText = " am";
         if( hour() > 12 ) { ampmText = " pm"; }
         String dateText = dayOfTheWeek(month(),day(),year()) + ", " + monthText[month()-1] + " " + day(); 
